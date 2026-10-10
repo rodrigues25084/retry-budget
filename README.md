@@ -38,3 +38,10 @@ The trade-off is explicit: this library is **not** a time-based rate limiter and
 - A retry that raises keeps its token. A retry that returns its token on success is the model: a successful retry did not, in the end, add load beyond the original attempt.
 - `bool` is rejected as a token count even though it subclasses `int` in Python. `RetryBudget(True)` raises `TypeError`; use `RetryBudget(1)`.
 - Under thread contention the budget may deny a few calls that would strictly have fit. It will never hand out more tokens than the budget allows.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
